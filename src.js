@@ -1,37 +1,28 @@
+const express = require('express');
+const app = express();
+app.use(express.urlencoded({ extended: false}));
+app.use(express.json());
 
+app.get('/api/medical-appointments/apointments', (req, res, next) => {
+        console.log("Pedir datos de citas");
+        next();
+}, (req, res) => {
+    res.json(appointments);
+}
+);
 
-const obtenerCitasDisponibles = async(especialidad, fecha_inicio, fecha_final)=>{
-    let response = await fetch("https://misiontic2022upb.vercel.app/api/medical-appointments/appointments", {
-        method: 'GET', 
-    }).then((response)=>response.json())
-
-    let citasApi = response.filter(element=> (
-        especialidad === element.especialidad 
-        &&
-        element.fecha >= fecha_inicio
-        &&
-        element.fecha <= fecha_final
-        ));	
-
-    return new Promise(resolve => {
-        setTimeout(() =>{ resolve(citasApi)}, 1000);
-    })
-        
-
-
-};
-
-const confirmarCita = async(idCita)=>{
-    let response = await fetch("https://misiontic2022upb.vercel.app/api/medical-appointments/confirm/"+idCita, {
-        method: 'POST', 
-    }).then((response)=>response.json())
-
-    return new Promise(resolve => {
-        setTimeout(() =>{ resolve(response)}, 1000);
+app.post('/api/medical-appointments/confirm/:appointment_id', (req, res) => {
+    console.log("Agendar una cita");
+    let appoint = parseInt( req.params.appointment_id );
+    let array = appointments;
+    appointments = appointments.map(appointment => {
+        if(appointment.id === appoint){
+            appointment.status = "confirmed";
+        }
     })
 
+    res.json(array);
+}
+)
 
-};
-
-module.exports.obtenerCitasDisponibles=obtenerCitasDisponibles;
-module.exports.confirmarCita=confirmarCita;
+module.exports = app;
